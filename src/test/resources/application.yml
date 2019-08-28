@@ -1,0 +1,9 @@
+spring:
+  profiles:
+    active: test
+
+---
+spring:
+  profiles: test
+  jackson:
+    property-naming-strategy: SNAKE_CASE

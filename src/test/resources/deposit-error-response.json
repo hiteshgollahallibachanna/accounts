@@ -1,0 +1,10 @@
+{
+  "code": "br1",
+  "message": "input parameter invalid",
+  "errors": [
+    {
+      "field": "pan",
+      "reason": "must not be null"
+    }
+  ]
+}

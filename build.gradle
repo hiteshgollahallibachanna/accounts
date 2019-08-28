@@ -1,0 +1,90 @@
+buildscript {
+    ext {
+        springBootVersion = '2.2.0.RELEASE'
+        restAssuredVersion = "4.1.2"
+        sleuthVersion = "2.1.4.RELEASE"
+    }
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+    dependencies {
+        classpath "io.spring.gradle:dependency-management-plugin:0.5.2.RELEASE"
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'groovy'
+apply plugin: 'maven'
+apply plugin: 'idea'
+apply plugin: 'application'
+apply plugin: 'jacoco'
+
+mainClassName = 'com.sail.accounts.Main'
+group = 'com.sail.accounts'
+jar {
+    manifest {
+        attributes "Main-Class": "$mainClassName"
+    }
+
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven { url "http://repo1.maven.org/maven2/" }
+    maven { url "http://repo.springsource.org/libs-release" }
+}
+
+
+dependencies {
+    implementation("org.springframework.boot:spring-boot-starter-web:${springBootVersion}")
+    implementation("org.springframework.cloud:spring-cloud-sleuth:${sleuthVersion}")
+    implementation("org.springframework.boot:spring-boot-starter-web-services:${springBootVersion}")
+    implementation("org.springframework.cloud:spring-cloud-starter-sleuth:${sleuthVersion}")
+
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
+    implementation group: 'org.apache.commons', name: 'commons-text', version: '1.2'
+    implementation group: 'com.google.guava', name: 'guava', version: '22.0'
+
+    implementation 'org.projectlombok:lombok:1.18.8'
+    annotationProcessor 'org.projectlombok:lombok:1.18.8'
+
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.21'
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.9.10.1'
+
+    testImplementation("org.springframework.boot:spring-boot-starter-test:${springBootVersion}") {
+        exclude group: "org.mockito", module: "mockito-core"
+    }
+    testImplementation("org.mockito:mockito-core:2.23.4")
+
+    def withoutSlf4j = { exclude group: 'org.slf4j', module: 'slf4j-api' }
+    testImplementation group: 'org.apache.kafka', name: 'kafka-clients', version: '2.0.1', withoutSlf4j
+    testImplementation("io.rest-assured:rest-assured:${restAssuredVersion}")
+    testImplementation group: 'io.rest-assured', name: 'json-path', version: '4.1.2'
+    testImplementation group: 'io.rest-assured', name: 'xml-path', version: '4.1.2'
+    testImplementation group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.4.11'
+    testImplementation "org.skyscreamer:jsonassert:1.5.0"
+}
+
+jacoco { toolVersion = '0.8.6' }
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        csv.enabled false
+        html.destination file("${buildDir}/jacocoHtml")
+    }
+}
+
+task(atmMachine, dependsOn: 'classes', type: JavaExec) {
+    main = 'com.sail.accounts.AtmMachine'
+    classpath = sourceSets.main.runtimeClasspath
+    standardInput = System.in
+}
+
+
